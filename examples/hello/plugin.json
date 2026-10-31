@@ -1,0 +1,17 @@
+{
+  "id": "neobase.hello",
+  "name": "Bonjour",
+  "version": "1.0.0",
+  "author": "NeoBase",
+  "description": "Un plugin d'exemple minimal pour le SDK.",
+  "icon": "icon.png",
+  "entry": "index.js",
+  "view": "hello",
+  "neobase": ">=4.0.0",
+  "type": "app",
+  "category": "Outils",
+  "mobile": true,
+  "system": false,
+  "dependencies": {},
+  "permissions": ["storage"]
+}
