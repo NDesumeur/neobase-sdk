@@ -158,6 +158,15 @@ et l'écrire dans le dossier.
 - `"autoload": true` dans `plugin.json` : le plugin se charge au démarrage, sans attendre son ouverture (accès complet et signature exigés).
 - `ctx.host.menuItem(nom, infobulle, fn)` ajoute une entrée au menu de NeoBase ; `ctx.host.closeTab(onglet)` ferme un onglet ; `ctx.host.statCount(clé)` compte un usage pour Stats ; `ctx.icon` est l'adresse de l'icône du plugin.
 
+### Le style d'un plugin
+
+Un plugin apporte **son propre style** : `ctx.host.addStyle(css)` (accès complet) l'ajoute à la page et le retire quand le plugin
+est déchargé. Pour rester dans l'esprit de NeoBase, sers-toi des variables du thème, qui suivent les couleurs choisies par
+l'utilisateur : `--magenta`, `--win`, `--line`, `--line2`, `--lilac`, `--shell`, `--muted`, `--bg0`, `--text` (police), `--title`
+(police des titres), `--pkr` (couleur d'accent en R, G, B, pour `rgba(var(--pkr), .3)`). Les classes communes du système
+(`btn`, `px`, `tab`, `label`, `hint`, `appWrap`, `agHead`, `f` pour un champ…) restent disponibles sans rien écrire.
+Le sélecteur de ta vue est `#plug_<id avec des _ au lieu des points>`.
+
 Le guide complet, de zéro à la Release : [`docs/PUBLIER.md`](docs/PUBLIER.md).
 
 ## Publier une version
