@@ -93,7 +93,7 @@ export default async function (ctx) {
 | `ctx.folder.readFile(nom)` / `.writeFile(nom, base64)` / `.removeFile(nom)` / `.listFiles()` | `storage` | les **fichiers** (images, sons…) de ton dossier de données, en base64 |
 | `ctx.storage.get()` / `.set(data)` | `storage` | raccourci : le document `storage` de ton dossier |
 | `ctx.data.get(idAutrePlugin)` | `data:<id>` | lire le document `storage` d'un autre plugin déclaré dans `uses` |
-| `ctx.host` | `full` | les outils d'interface de NeoBase : `el`, `toast`, `sfx`, `ask`, `newTab`, `pixIcon`, `PIX`, `WX` |
+| `ctx.host` | `full` | les outils d'interface de NeoBase : `el`, `toast`, `sfx`, `ask`, `newTab`, `pixIcon`, `PIX`, `WX`, `win(action)`, **`confirm(message)`** (boîte de confirmation de NeoBase, renvoie une promesse `true`/`false`, jamais la fenêtre de Windows), `box({title, text, buttons, danger})`, `settings()` (réglages de NeoBase en lecture seule), `tabLabel(texte, titre)` (le texte de ton onglet : messages non lus…) |
 | `ctx.legacy` | `full` | lecture seule des données d'**avant les plugins** (`settings()`, `api(nom)`, `local(clé)`), pour reprendre ce que l'utilisateur avait à la première ouverture |
 | `ctx.files.add/read/remove` | `files` | fichiers (images, exports…) du plugin |
 | `ctx.net(url, opts)` | `network` | requêtes réseau sortantes |
