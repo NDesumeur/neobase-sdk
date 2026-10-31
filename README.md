@@ -152,10 +152,18 @@ et l'écrire dans le dossier.
 - À la désinstallation, NeoBase propose de **garder** les données (elles restent dans la synchro et
   reviennent à la réinstallation) ou de les **effacer** (l'effacement est envoyé aux autres appareils).
 
+### Fichiers livrés, plugin toujours actif, menu
+
+- Tout fichier ajouté à l'archive (images, bibliothèques) est posé dans le dossier du plugin ; un plugin d'accès complet le lit avec `neo.pluginFileRead(ctx.id, 'chemin')` (base64).
+- `"autoload": true` dans `plugin.json` : le plugin se charge au démarrage, sans attendre son ouverture (accès complet et signature exigés).
+- `ctx.host.menuItem(nom, infobulle, fn)` ajoute une entrée au menu de NeoBase ; `ctx.host.closeTab(onglet)` ferme un onglet ; `ctx.host.statCount(clé)` compte un usage pour Stats ; `ctx.icon` est l'adresse de l'icône du plugin.
+
+Le guide complet, de zéro à la Release : [`docs/PUBLIER.md`](docs/PUBLIER.md).
+
 ## Publier une version
 
 1. Monte `version` dans `plugin.json`.
-2. Crée une archive `.zip` contenant `plugin.json` et tout le code à la racine.
+2. Crée une archive `.zip` contenant `plugin.json`, `index.js` à la racine et les dossiers de fichiers livrés (voir le guide).
 3. Publie une Release GitHub dont le tag est la version (`v1.0.0`) et joins-y le `.zip`.
 4. Pour un plugin officiel, joins aussi l'`attestation.json` signée (voir « Approbation »).
 
