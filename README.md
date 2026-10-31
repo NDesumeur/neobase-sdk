@@ -55,7 +55,8 @@ L'exemple complet le plus simple est dans [`examples/hello`](examples/hello).
 | `category` | catégorie dans NeoStore (Jeux, Outils, Bureautique…) |
 | `mobile` | `true` si compatible avec le téléphone |
 | `system` | réservé : un plugin système ne peut pas être désinstallé (fixé par NeoBase, pas par l'auteur) |
-| `dependencies` | autres plugins requis : `{ "neobase.autreplugin": ">=1.2.0" }` |
+| `dependencies` | autres plugins requis : `{ "neobase.autreplugin": ">=1.2.0" }` (installés automatiquement depuis le catalogue) |
+| `uses` | plugins dont celui-ci lit les données : `["neobase.peche"]` (demande la permission `data:<id>`) |
 | `permissions` | liste des autorisations demandées (voir plus bas) |
 
 Le schéma de validation est dans [`plugin.schema.json`](plugin.schema.json).
@@ -66,15 +67,14 @@ Le schéma de validation est dans [`plugin.schema.json`](plugin.schema.json).
 n'a accès qu'à ce contexte, jamais au reste de NeoBase ni aux autres plugins.
 
 ```js
-export default function (ctx) {
+export default async function (ctx) {
   const box = ctx.el('div', 'hello');
   box.textContent = 'Bonjour ' + ctx.id;
   ctx.view.append(box);
 
-  ctx.onOpen(async () => {
-    const saved = await ctx.storage.get();          // données du plugin, isolées et synchronisées
-    box.textContent = saved?.note || 'Bonjour';
-  });
+  const saved = await ctx.folder.read('notes');      // un document de TON dossier de données : sauvegardé par NeoBase
+  box.textContent = saved?.note || 'Bonjour';
+  ctx.onOpen(() => box.focus?.());
 }
 ```
 
@@ -89,7 +89,12 @@ export default function (ctx) {
 | `ctx.ui.newTab(url)` | toujours | ouvrir un onglet |
 | `ctx.ui.pixIcon(rows)` | toujours | icône pixel art |
 | `ctx.onOpen(fn)`, `ctx.onClose(fn)` | toujours | à l'ouverture / fermeture de la vue |
-| `ctx.storage.get()` / `.set(data)` | `storage` | JSON propre au plugin, isolé, sauvegardé dans le cloud |
+| `ctx.folder.read(nom)` / `.write(nom, json)` / `.remove(nom)` / `.list()` | `storage` | les **documents JSON** de ton dossier de données |
+| `ctx.folder.readFile(nom)` / `.writeFile(nom, base64)` / `.removeFile(nom)` / `.listFiles()` | `storage` | les **fichiers** (images, sons…) de ton dossier de données, en base64 |
+| `ctx.storage.get()` / `.set(data)` | `storage` | raccourci : le document `storage` de ton dossier |
+| `ctx.data.get(idAutrePlugin)` | `data:<id>` | lire le document `storage` d'un autre plugin déclaré dans `uses` |
+| `ctx.host` | `full` | les outils d'interface de NeoBase : `el`, `toast`, `sfx`, `ask`, `newTab`, `pixIcon`, `PIX`, `WX` |
+| `ctx.legacy` | `full` | lecture seule des données d'**avant les plugins** (`settings()`, `api(nom)`, `local(clé)`), pour reprendre ce que l'utilisateur avait à la première ouverture |
 | `ctx.files.add/read/remove` | `files` | fichiers (images, exports…) du plugin |
 | `ctx.net(url, opts)` | `network` | requêtes réseau sortantes |
 | `ctx.permission(nom)` | toujours | demander une autorisation à l'usage ; renvoie un booléen |
@@ -107,14 +112,45 @@ besoin plus tard, il la redemande.
 | `network` | contacter Internet |
 | `clipboard` | lire/écrire le presse-papiers |
 | `notifications` | afficher des notifications |
+| `full` | **accès complet** : le plugin tourne dans la page de NeoBase, avec ses outils d'interface (`ctx.host`). Réservé aux plugins **signés** par NeoBase ; jamais accordé d'office, NeoBase le demande à la première ouverture avec un avertissement |
+| `data:<id>` | lire les données d'un autre plugin (à déclarer aussi dans `uses`) |
 
 Demande le minimum : un plugin qui réclame trop d'autorisations est refusé à l'examen.
 
-## Isolation, données, désinstallation
+## Le dossier de données du plugin
+
+Chaque plugin a son **dossier de données**, `plugindata/<id>/` dans les données de NeoBase. Il contient :
+
+- des **documents JSON** (`ctx.folder.read/write`) ;
+- des **fichiers** (`ctx.folder.readFile/writeFile`), rangés dans `files/`.
+
+NeoBase s'en sert pour la **sauvegarde cloud** : chaque document devient une section de la synchro
+entre appareils (fusionnée champ par champ, avec gestion des conflits dans fgestion), chaque fichier est
+copié dans le fichier de synchro, et le tout est dans les sauvegardes automatiques. Tu n'as rien à faire :
+écris tes données dans ton dossier et elles suivent l'utilisateur d'un appareil à l'autre.
+
+Règles :
+
+- noms de documents et de fichiers : lettres, chiffres, `.`, `_`, `-` (80 caractères au plus, jamais `..`) ;
+- 8 Mo au plus par document, 15 Mo au plus par fichier ;
+- une structure **avec des listes d'objets portant un `id`** se fusionne finement entre appareils
+  (deux appareils qui ajoutent chacun une ligne gardent les deux) ;
+- un plugin **ne lit jamais** le dossier d'un autre, sauf via `ctx.data.get` après autorisation.
+
+### Reprendre les données d'avant
+
+Un plugin qui remplace une ancienne appli de NeoBase (`full` uniquement) peut lire **une fois**, à la
+première ouverture, ce que l'utilisateur avait (`ctx.legacy`), le copier dans son dossier, puis ne plus
+jamais y toucher. Exemple : si `ctx.folder.read('budget')` renvoie `null`, lire `await ctx.legacy.api('budget')`
+et l'écrire dans le dossier.
+
+## Isolation, désinstallation
 
 - Un plugin ne peut pas lire ni modifier les fichiers d'un autre plugin ni le cœur de NeoBase.
-- Ses données vivent dans un espace à son `id`, inclus dans la synchronisation et les sauvegardes.
-- À la désinstallation, NeoBase propose de garder ou d'effacer ces données.
+- Son **code** est retéléchargé sur chaque appareil depuis sa Release (signature revérifiée) : un plugin
+  installé sur un appareil apparaît installé sur les autres.
+- À la désinstallation, NeoBase propose de **garder** les données (elles restent dans la synchro et
+  reviennent à la réinstallation) ou de les **effacer** (l'effacement est envoyé aux autres appareils).
 
 ## Publier une version
 

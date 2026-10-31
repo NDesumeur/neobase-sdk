@@ -18,7 +18,8 @@
     "category": { "type": "string" },
     "mobile": { "type": "boolean", "default": false },
     "system": { "type": "boolean", "default": false },
+    "uses": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)+$" }, "description": "plugins dont celui-ci lit les données (permission data:<id>)" },
     "dependencies": { "type": "object", "additionalProperties": { "type": "string" } },
-    "permissions": { "type": "array", "items": { "enum": ["storage", "files", "network", "clipboard", "notifications"] }, "uniqueItems": true }
+    "permissions": { "type": "array", "items": { "enum": ["storage", "files", "network", "clipboard", "notifications", "full"] }, "uniqueItems": true }
   }
 }
