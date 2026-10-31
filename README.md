@@ -158,6 +158,19 @@ et l'écrire dans le dossier.
 - `"autoload": true` dans `plugin.json` : le plugin se charge au démarrage, sans attendre son ouverture (accès complet et signature exigés).
 - `ctx.host.menuItem(nom, infobulle, fn)` ajoute une entrée au menu de NeoBase ; `ctx.host.closeTab(onglet)` ferme un onglet ; `ctx.host.statCount(clé)` compte un usage pour Stats ; `ctx.icon` est l'adresse de l'icône du plugin.
 
+### L'emploi du temps de NeoBase
+
+Un plugin d'accès complet peut y mettre ses événements : `ctx.host.agenda.sync('mon-plugin', [événements])` **remplace** à chaque
+appel tous les événements de ce plugin (ils portent son nom dans `src`). Un événement :
+`{ id, kind: 'event', title, date: 'AAAA-MM-JJ', start: 'HH:MM', end: 'HH:MM', allDay: false, color, place }`. Les identifiants doivent être
+stables (`monplugin:<identifiant du match>`) : deux PC synchronisés obtiennent les mêmes événements. Appelle `sync(nom, [])` pour les
+retirer quand l'utilisateur décoche le réglage. Les plugins « Sorties anime » et « NBA » s'en servent.
+
+### Les captures d'un plugin
+
+Mets une ou plusieurs captures dans le dépôt, dans `screenshots/1.jpg` (le thème Néon de NeoBase, 1280 × 800) : NeoStore les montre sur la
+fiche du plugin quand le catalogue les référence. Elles ne font pas partie de l'archive.
+
 ### Le style d'un plugin
 
 Un plugin apporte **son propre style** : `ctx.host.addStyle(css)` (accès complet) l'ajoute à la page et le retire quand le plugin
