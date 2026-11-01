@@ -18,6 +18,8 @@
     "category": { "type": "string" },
     "mobile": { "type": "boolean", "default": false },
     "system": { "type": "boolean", "default": false },
+    "main": { "type": "string", "pattern": "^[\\w.\\-/]+\\.js$", "description": "Volet système : fichier Node chargé si le plugin est signé, activé et a l'accès complet." },
+    "sync": { "type": "object", "description": "Règles de fusion de la synchro par document : { doc: { auto: [chemins], union: [chemins] } }", "additionalProperties": { "type": "object", "properties": { "auto": { "type": "array", "items": { "type": "string" } }, "union": { "type": "array", "items": { "type": "string" } } } } },
     "uses": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)+$" }, "description": "plugins dont celui-ci lit les données (permission data:<id>)" },
     "dependencies": { "type": "object", "additionalProperties": { "type": "string" } },
     "autoload": { "type": "boolean", "description": "Charger le plugin au démarrage (accès complet et signature exigés)." },

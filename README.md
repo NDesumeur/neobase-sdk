@@ -30,7 +30,7 @@ L'exemple complet le plus simple est dans [`examples/hello`](examples/hello).
   "icon": "icon.png",
   "entry": "index.js",
   "view": "hello",
-  "neobase": ">=4.0.0",
+  "neobase": ">=4.1.0",
   "type": "app",
   "category": "Outils",
   "mobile": true,
@@ -54,7 +54,9 @@ L'exemple complet le plus simple est dans [`examples/hello`](examples/hello).
 | `type` | `app` (une application) ou `mod` (modifie NeoBase : sorties animes, calendrier…) |
 | `category` | catégorie dans NeoStore (Jeux, Outils, Bureautique…) |
 | `mobile` | `true` si compatible avec le téléphone |
-| `system` | réservé : un plugin système ne peut pas être désinstallé (fixé par NeoBase, pas par l'auteur) |
+| `system` | réservé : un plugin système ne peut pas être désinstallé et se range dans la catégorie « Système » (fixé par NeoBase, pas par l'auteur). Réservé aux applis qui dépendent du cœur de NeoBase |
+| `main` | le **volet système** du plugin : un fichier Node (`main.js`) chargé par NeoBase seulement si le plugin est signé, activé et que l'accès complet est accordé (voir plus bas) |
+| `sync` | les règles de fusion de la synchro pour les documents du plugin (voir « Le dossier de données ») |
 | `dependencies` | autres plugins requis : `{ "neobase.autreplugin": ">=1.2.0" }` (installés automatiquement depuis le catalogue) |
 | `uses` | plugins dont celui-ci lit les données : `["neobase.peche"]` (demande la permission `data:<id>`) |
 | `permissions` | liste des autorisations demandées (voir plus bas) |
@@ -143,6 +145,34 @@ Un plugin qui remplace une ancienne appli de NeoBase (`full` uniquement) peut li
 première ouverture, ce que l'utilisateur avait (`ctx.legacy`), le copier dans son dossier, puis ne plus
 jamais y toucher. Exemple : si `ctx.folder.read('budget')` renvoie `null`, lire `await ctx.legacy.api('budget')`
 et l'écrire dans le dossier.
+
+### Les règles de fusion de la synchro
+
+Chaque document du dossier part dans le fichier de synchro (une section `pd/<id>/<nom>`), sur tous tes PC et, plus tard, tes téléphones. Quand deux appareils ont changé le même morceau, NeoBase garde les deux versions et te demande de choisir. Pour un document fait de compteurs, de caches ou d'une liste qui ne fait que grandir, déclare comment fusionner dans `plugin.json` :
+
+```json
+"sync": { "library": { "auto": ["session", "stats.*"], "union": ["stats.history"] } }
+```
+
+- `auto` : des chemins dans le document, où le plus récent gagne sans rien demander (`*` = un niveau).
+- `union` : des listes sans identifiant qui ne font que grandir : on garde l'union des deux.
+
+## Le volet système d'un plugin (`main`)
+
+Un plugin qui a besoin de Node ou d'Electron (lancer un programme, lire des fichiers du PC, des raccourcis globaux, servir des fichiers) met ce code dans un fichier `main.js`, nommé par le champ `main`. NeoBase le charge **seulement** si le plugin est signé, activé et a reçu l'accès complet : aucun code de ce genre ne vit dans le cœur.
+
+```js
+module.exports = api => {
+  api.ipcMain.handle('mon:salut', async (_, nom) => 'Salut ' + nom);   // appelé par la page du plugin
+  api.protocol(async (req, url) => api.serveFile(monFichier, req));    // sert neoplugin://<id>/…
+  api.emit('mon:evenement', { x: 1 });                                  // prévient la page
+  return () => { /* nettoyage quand le plugin est désactivé ou mis à jour */ };
+};
+```
+
+`api` contient : `id`, `electron`, `getWin`, `dataDir`, `ipcMain.handle`, `emit`, `protocol`, `serveFile`, `onShortcutReset`, `readDoc` et `writeDoc` (les documents du dossier du plugin).
+
+Dans la page du plugin : `await ctx.neo.pluginMain('<id>', 'mon:salut', 'toi')` appelle ce code, et `ctx.neo.onPluginMain(e => …)` reçoit ses événements (`e.id`, `e.name`, `e.data`). Les fichiers servis sont à l'adresse `neoplugin://<id>/…`. Mets `main.js` (et les fichiers qu'il utilise) dans l'archive, à côté de `plugin.json` et `index.js`. Un plugin peut appeler le volet système d'un autre en le déclarant dans `dependencies`.
 
 ## Isolation, désinstallation
 
