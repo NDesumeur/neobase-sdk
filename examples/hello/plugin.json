@@ -1,8 +1,8 @@
 {
-  "id": "neobase.hello",
+  "id": "neodex.hello",
   "name": "Bonjour",
   "version": "1.0.0",
-  "author": "NeoBase",
+  "author": "NeoDex",
   "description": "Un plugin d'exemple minimal pour le SDK.",
   "icon": "icon.png",
   "entry": "index.js",

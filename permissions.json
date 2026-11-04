@@ -1,7 +1,7 @@
 {
   "registry": 2,
   "sdk": "2.1.0",
-  "about": "Registre unique des autorisations de NeoBase. Source de vérité pour le SDK, le schéma plugin.schema.json, le moteur de plugins, NeoStore et l'appli Autorisations. Une autorisation absente de ce registre fait échouer la validation du plugin.",
+  "about": "Registre unique des autorisations de NeoDex. Source de vérité pour le SDK, le schéma plugin.schema.json, le moteur de plugins, NeoStore et l'appli Autorisations. Une autorisation absente de ce registre fait échouer la validation du plugin.",
   "risks": {
     "faible": "Ne touche qu'à ce qui appartient au plugin.",
     "moyen": "Sort du plugin : Internet, presse-papiers, données d'un autre plugin en lecture.",
@@ -11,7 +11,7 @@
     {
       "id": "storage",
       "label": "Ses données",
-      "sentence": "Peut garder ses propres données (sauvegardées et synchronisées par NeoBase).",
+      "sentence": "Peut garder ses propres données (sauvegardées et synchronisées par NeoDex).",
       "risk": "faible",
       "scope": {
         "quota": "sans plafond pour un plugin signé, 1 Go pour tout le dossier d'un plugin non vérifié"
@@ -26,7 +26,7 @@
     {
       "id": "notifications",
       "label": "Notifications",
-      "sentence": "Peut t'envoyer des notifications dans le centre de notifications de NeoBase.",
+      "sentence": "Peut t'envoyer des notifications dans le centre de notifications de NeoDex.",
       "risk": "faible"
     },
     {
@@ -104,7 +104,7 @@
     {
       "id": "agenda",
       "label": "Ton emploi du temps",
-      "sentence": "Peut ajouter ses propres événements à l'emploi du temps de NeoBase.",
+      "sentence": "Peut ajouter ses propres événements à l'emploi du temps de NeoDex.",
       "risk": "faible"
     },
     {
@@ -116,7 +116,7 @@
     {
       "id": "background",
       "label": "Tâches de fond",
-      "sentence": "Peut tourner sans être ouvert, dès le démarrage de NeoBase.",
+      "sentence": "Peut tourner sans être ouvert, dès le démarrage de NeoDex.",
       "risk": "moyen"
     },
     {
@@ -128,7 +128,7 @@
     {
       "id": "shortcuts",
       "label": "Raccourcis globaux",
-      "sentence": "Peut réagir à ses raccourcis clavier même quand NeoBase n'est pas au premier plan.",
+      "sentence": "Peut réagir à ses raccourcis clavier même quand NeoDex n'est pas au premier plan.",
       "risk": "moyen"
     },
     {
@@ -164,7 +164,7 @@
     {
       "id": "system:update",
       "label": "Mises à jour",
-      "sentence": "Peut chercher et installer les mises à jour de NeoBase et de ses plugins. Très sensible : accordé seulement aux plugins signés.",
+      "sentence": "Peut chercher et installer les mises à jour de NeoDex et de ses plugins. Très sensible : accordé seulement aux plugins signés.",
       "risk": "élevé",
       "sensitive": true,
       "signedOnly": true
@@ -180,7 +180,7 @@
     {
       "id": "full",
       "label": "Accès complet",
-      "sentence": "Peut tout faire dans NeoBase, comme une appli intégrée : lire tes onglets, tes réglages et les données des autres plugins.",
+      "sentence": "Peut tout faire dans NeoDex, comme une appli intégrée : lire tes onglets, tes réglages et les données des autres plugins.",
       "risk": "élevé",
       "sensitive": true,
       "signedOnly": true

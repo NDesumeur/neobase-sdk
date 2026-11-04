@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Plugin NeoBase",
+  "title": "Plugin NeoDex",
   "type": "object",
   "required": [
     "id",
@@ -49,7 +49,7 @@
     },
     "neobase": {
       "type": "string",
-      "description": "plage semver des versions de NeoBase compatibles"
+      "description": "plage semver des versions de NeoDex compatibles"
     },
     "type": {
       "enum": [
@@ -57,7 +57,7 @@
         "mod",
         "theme"
       ],
-      "description": "app : une application ; mod : modifie NeoBase ; theme : n'apporte que des thèmes (champ themes)"
+      "description": "app : une application ; mod : modifie NeoDex ; theme : n'apporte que des thèmes (champ themes)"
     },
     "category": {
       "type": "string"
@@ -189,7 +189,7 @@
           },
           "global": {
             "type": "boolean",
-            "description": "raccourci actif même quand NeoBase n'est pas au premier plan (autorisation shortcuts)"
+            "description": "raccourci actif même quand NeoDex n'est pas au premier plan (autorisation shortcuts)"
           },
           "background": {
             "type": "boolean",

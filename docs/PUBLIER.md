@@ -1,11 +1,11 @@
-# Publier un plugin NeoBase, pas à pas
+# Publier un plugin NeoDex, pas à pas
 
 Ce guide va de zéro à un plugin que n'importe qui peut installer depuis NeoStore.
 
 ## 1. Le dépôt
 
-1. Crée un dépôt **public** sur GitHub, par exemple `neobase-plugin-monplugin`.
-2. Ajoute-lui le *topic* **`neobase-plugin`** (page du dépôt → roue dentée à côté de « About »). C'est
+1. Crée un dépôt **public** sur GitHub, par exemple `neodex-plugin-monplugin`.
+2. Ajoute-lui le *topic* **`neodex-plugin`** (page du dépôt → roue dentée à côté de « About »). C'est
    ce qui permet à NeoStore de le trouver.
 3. Mets-y au minimum :
    - `plugin.json` : l'identité du plugin (voir le [README](../README.md)) ;
@@ -23,16 +23,16 @@ Pas de tiret. Il ne change jamais d'une version à l'autre.
 ```js
 export default async function (ctx) {
   ctx.view.textContent = 'Bonjour !';
-  const notes = (await ctx.folder.read('notes')) || {};   // tes données : sauvegardées et synchronisées par NeoBase
+  const notes = (await ctx.folder.read('notes')) || {};   // tes données : sauvegardées et synchronisées par NeoDex
   ctx.onOpen(() => { /* la vue vient d'être affichée */ });
 }
 ```
 
 Règles d'or :
 
-- **Tes données vont dans `ctx.folder`**, jamais ailleurs. NeoBase les sauvegarde, les synchronise entre les
+- **Tes données vont dans `ctx.folder`**, jamais ailleurs. NeoDex les sauvegarde, les synchronise entre les
   PC et les efface à la désinstallation si l'utilisateur le demande.
-- **N'utilise rien du cœur de NeoBase** qui ne soit pas dans `ctx` : il peut changer d'une version à l'autre.
+- **N'utilise rien du cœur de NeoDex** qui ne soit pas dans `ctx` : il peut changer d'une version à l'autre.
 - **Demande le minimum d'autorisations.** `storage` suffit à la plupart des plugins.
 
 ### Livrer des fichiers avec le plugin (images, polices, bibliothèques)
@@ -51,7 +51,7 @@ Par défaut un plugin ne se charge qu'à sa première ouverture. S'il doit agir 
 sur l'accueil, un écouteur d'événements…), ajoute `"autoload": true` dans `plugin.json` (accès complet et
 signature exigés).
 
-### S'ajouter au menu de NeoBase
+### S'ajouter au menu de NeoDex
 
 Un plugin d'accès complet peut ajouter une entrée au menu : `ctx.host.menuItem('Nom', 'info-bulle', () => { … })`.
 
@@ -86,9 +86,9 @@ livrés. Nomme l'archive `<id>-<version>.zip` (par exemple `mondev.monplugin-1.0
 
 ## 6. Demander l'approbation officielle
 
-Un plugin **approuvé** est examiné par NeoBase, reçoit une attestation signée, entre au catalogue et peut
+Un plugin **approuvé** est examiné par NeoDex, reçoit une attestation signée, entre au catalogue et peut
 demander l'accès complet. La procédure est décrite dans
-[`APPROBATION.md`](https://github.com/NDesumeur/neobase-store-catalog/blob/main/APPROBATION.md) du catalogue.
+[`APPROBATION.md`](https://github.com/NDesumeur/neodex-store-catalog/blob/main/APPROBATION.md) du catalogue.
 En bref : ouvre une *issue* « Proposer un plugin » avec le lien de ton dépôt.
 
 ## Mettre à jour
