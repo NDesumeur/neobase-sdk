@@ -20,9 +20,16 @@
     "system": { "type": "boolean", "default": false },
     "main": { "type": "string", "pattern": "^[\\w.\\-/]+\\.js$", "description": "Volet système : fichier Node chargé si le plugin est signé, activé et a l'accès complet." },
     "sync": { "type": "object", "description": "Règles de fusion de la synchro par document : { doc: { auto: [chemins], union: [chemins] } }", "additionalProperties": { "type": "object", "properties": { "auto": { "type": "array", "items": { "type": "string" } }, "union": { "type": "array", "items": { "type": "string" } } } } },
-    "uses": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)+$" }, "description": "plugins dont celui-ci lit les données (permission data:<id>)" },
+    "uses": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)+$" }, "description": "plugins dont celui-ci lit les données (donne la permission data:<id>:read)" },
     "dependencies": { "type": "object", "additionalProperties": { "type": "string" } },
     "autoload": { "type": "boolean", "description": "Charger le plugin au démarrage (accès complet et signature exigés)." },
-    "permissions": { "type": "array", "items": { "enum": ["storage", "files", "network", "clipboard", "notifications", "full"] }, "uniqueItems": true }
+    "sdk": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "version du SDK (et donc du registre des autorisations) pour laquelle le plugin est écrit, ex. 2.0.0" },
+    "exposes": { "type": "object", "description": "ce que le plugin partage avec les autres : { \"storage\": \"read\" } ou { \"storage\": \"write\" }", "properties": { "storage": { "enum": ["read", "write"] } }, "additionalProperties": false },
+    "permissions": { "type": "array", "uniqueItems": true, "description": "autorisations prises dans le registre permissions.json ; une autre fait échouer la validation", "items": { "anyOf": [
+      { "enum": ["storage", "files", "network", "clipboard", "notifications", "full"] },
+      { "type": "string", "pattern": "^network:(\\*\\.)?([a-z0-9-]+\\.)+[a-z]{2,}$" },
+      { "type": "string", "pattern": "^data:[a-z0-9]+(\\.[a-z0-9]+)+:(read|write)$" },
+      { "type": "string", "pattern": "^system:exec:(explorer|notepad|winget|warp-cli|obs64|Discord)$" }
+    ] } }
   }
 }

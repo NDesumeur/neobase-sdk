@@ -1,0 +1,95 @@
+{
+  "registry": 2,
+  "sdk": "2.0.0",
+  "about": "Registre unique des autorisations de NeoBase. Source de vérité pour le SDK, le schéma plugin.schema.json, le moteur de plugins, NeoStore et l'appli Autorisations. Une autorisation absente de ce registre fait échouer la validation du plugin.",
+  "risks": {
+    "faible": "Ne touche qu'à ce qui appartient au plugin.",
+    "moyen": "Sort du plugin : Internet, presse-papiers, données d'un autre plugin en lecture.",
+    "élevé": "Peut modifier ce qui ne lui appartient pas, ou agir sur ton PC."
+  },
+  "permissions": [
+    {
+      "id": "storage",
+      "label": "Ses données",
+      "sentence": "Peut garder ses propres données (sauvegardées et synchronisées par NeoBase).",
+      "risk": "faible",
+      "scope": { "quota": "50 Mo pour tout son dossier de données" }
+    },
+    {
+      "id": "files",
+      "label": "Ses fichiers",
+      "sentence": "Peut lire les fichiers livrés avec le plugin (images, sons…), et rien d'autre sur ton PC.",
+      "risk": "faible"
+    },
+    {
+      "id": "notifications",
+      "label": "Notifications",
+      "sentence": "Peut t'envoyer des notifications dans le centre de notifications de NeoBase.",
+      "risk": "faible"
+    },
+    {
+      "id": "network:<domaine>",
+      "pattern": "^network:(\\*\\.)?([a-z0-9-]+\\.)+[a-z]{2,}$",
+      "label": "Internet ({domaine})",
+      "sentence": "Peut contacter {domaine}, et aucun autre site.",
+      "risk": "faible",
+      "scope": { "domaine": "un nom de domaine ; *.exemple.org couvre aussi ses sous-domaines" }
+    },
+    {
+      "id": "network",
+      "label": "Internet (tous les sites)",
+      "sentence": "Peut contacter n'importe quel site Internet.",
+      "risk": "moyen"
+    },
+    {
+      "id": "clipboard",
+      "label": "Presse-papiers",
+      "sentence": "Peut lire et écrire ce que tu as copié.",
+      "risk": "moyen"
+    },
+    {
+      "id": "data:<plugin>:read",
+      "pattern": "^data:[a-z0-9]+(\\.[a-z0-9]+)+:read$",
+      "label": "Lire les données de {plugin}",
+      "sentence": "Peut lire les données que {plugin} partage.",
+      "risk": "moyen",
+      "scope": { "plugin": "l'identifiant de l'autre plugin, qui doit aussi le déclarer dans « exposes »" }
+    },
+    {
+      "id": "data:<plugin>:write",
+      "pattern": "^data:[a-z0-9]+(\\.[a-z0-9]+)+:write$",
+      "label": "Modifier les données de {plugin}",
+      "sentence": "Peut modifier les données que {plugin} partage.",
+      "risk": "élevé",
+      "scope": { "plugin": "l'identifiant de l'autre plugin, qui doit aussi le déclarer dans « exposes » avec « write »" }
+    },
+    {
+      "id": "system:exec:<programme>",
+      "pattern": "^system:exec:[A-Za-z0-9._-]+$",
+      "label": "Lancer {programme}",
+      "sentence": "Peut lancer le programme {programme} sur ton PC. Très sensible : accordé seulement aux plugins signés.",
+      "risk": "élevé",
+      "sensitive": true,
+      "signedOnly": true,
+      "scope": { "programme": "le nom exact du programme, pris dans une liste blanche" }
+    },
+    {
+      "id": "full",
+      "label": "Accès complet",
+      "sentence": "Peut tout faire dans NeoBase, comme une appli intégrée : lire tes onglets, tes réglages et les données des autres plugins.",
+      "risk": "élevé",
+      "sensitive": true,
+      "signedOnly": true
+    }
+  ],
+  "execAllowed": ["explorer", "notepad", "winget", "warp-cli", "obs64", "Discord"],
+  "legacy": {
+    "data:<plugin>": "data:<plugin>:read"
+  },
+  "risky": [
+    { "all": ["network", "files"], "why": "peut envoyer sur Internet les fichiers qu'il lit" },
+    { "all": ["network", "clipboard"], "why": "peut envoyer sur Internet ce que tu as copié" },
+    { "all": ["network", "data:*:read"], "why": "peut envoyer sur Internet les données d'un autre plugin" },
+    { "all": ["network", "system:exec:*"], "why": "peut télécharger puis lancer un programme" }
+  ]
+}

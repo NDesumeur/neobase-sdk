@@ -58,7 +58,9 @@ L'exemple complet le plus simple est dans [`examples/hello`](examples/hello).
 | `main` | le **volet système** du plugin : un fichier Node (`main.js`) chargé par NeoBase seulement si le plugin est signé, activé et que l'accès complet est accordé (voir plus bas) |
 | `sync` | les règles de fusion de la synchro pour les documents du plugin (voir « Le dossier de données ») |
 | `dependencies` | autres plugins requis : `{ "neobase.autreplugin": ">=1.2.0" }` (installés automatiquement depuis le catalogue) |
-| `uses` | plugins dont celui-ci lit les données : `["neobase.peche"]` (demande la permission `data:<id>`) |
+| `uses` | plugins dont celui-ci lit les données : `["neobase.peche"]` (demande la permission `data:<id>:read`) |
+| `exposes` | ce que ce plugin partage : `{ "storage": "read" }` ou `{ "storage": "write" }` |
+| `sdk` | version du SDK et du registre des autorisations visée : `"2.0.0"` |
 | `permissions` | liste des autorisations demandées (voir plus bas) |
 
 Le schéma de validation est dans [`plugin.schema.json`](plugin.schema.json).
@@ -94,28 +96,51 @@ export default async function (ctx) {
 | `ctx.folder.read(nom)` / `.write(nom, json)` / `.remove(nom)` / `.list()` | `storage` | les **documents JSON** de ton dossier de données |
 | `ctx.folder.readFile(nom)` / `.writeFile(nom, base64)` / `.removeFile(nom)` / `.listFiles()` | `storage` | les **fichiers** (images, sons…) de ton dossier de données, en base64 |
 | `ctx.storage.get()` / `.set(data)` | `storage` | raccourci : le document `storage` de ton dossier |
-| `ctx.data.get(idAutrePlugin)` | `data:<id>` | lire le document `storage` d'un autre plugin déclaré dans `uses` |
+| `ctx.data.get(idAutrePlugin)` / `.set(idAutrePlugin, données)` | `data:<id>:read` / `:write` | lire ou modifier le document `storage` d'un autre plugin qui le partage (`exposes`) |
 | `ctx.host` | `full` | les outils d'interface de NeoBase : `el`, `toast`, `sfx`, `ask`, `newTab`, `pixIcon`, `PIX`, `WX`, `win(action)`, **`confirm(message)`** (boîte de confirmation de NeoBase, renvoie une promesse `true`/`false`, jamais la fenêtre de Windows), `box({title, text, buttons, danger})`, `settings()` (réglages de NeoBase en lecture seule), `tabLabel(texte, titre)` (le texte de ton onglet : messages non lus…), `pref(nom)` (un réglage de NeoBase, lecture seule), **`hooks({audio, mute, onClose, onTabChange, playing})`** : dis à NeoBase si ton plugin joue du son (haut-parleur sur l'onglet, NeoMe qui danse), ce qu'il doit faire quand ton onglet se ferme ou que l'utilisateur change d'onglet (mini-lecteur…) |
 | `ctx.legacy` | `full` | lecture seule des données d'**avant les plugins** (`settings()`, `api(nom)`, `local(clé)`), pour reprendre ce que l'utilisateur avait à la première ouverture |
 | `ctx.files.add/read/remove` | `files` | fichiers (images, exports…) du plugin |
-| `ctx.net(url, opts)` | `network` | requêtes réseau sortantes |
-| `ctx.permission(nom)` | toujours | demander une autorisation à l'usage ; renvoie un booléen |
+| `ctx.net(url, opts)` | `network` ou `network:<domaine>` | requêtes réseau sortantes |
+| `ctx.permission(nom, raison)` | toujours | demander une autorisation au moment de l'utiliser, en disant pourquoi ; l'utilisateur choisit « cette fois », « toujours » ou « refuser » ; renvoie un booléen |
 
 ### Les autorisations
 
-Un plugin ne reçoit que les autorisations qu'il déclare **et** que l'utilisateur accorde. Elles
-sont visibles et révocables à tout moment dans l'appli **Autorisations** ; si le plugin en a
-besoin plus tard, il la redemande.
+Toutes les autorisations viennent d'un seul registre, [`permissions.json`](permissions.json) (registre 2, SDK 2.0.0).
+Pour chacune, il donne son identifiant, son libellé, la phrase montrée à l'utilisateur et son niveau de risque.
+Une autorisation absente du registre fait échouer la validation du plugin.
 
-| Autorisation | Donne accès à |
-|--------------|---------------|
-| `storage` | ses propres données (conseillé pour presque tous) |
-| `files` | lire/écrire les fichiers du plugin |
-| `network` | contacter Internet |
-| `clipboard` | lire/écrire le presse-papiers |
-| `notifications` | afficher des notifications |
-| `full` | **accès complet** : le plugin tourne dans la page de NeoBase, avec ses outils d'interface (`ctx.host`). Réservé aux plugins **signés** par NeoBase ; jamais accordé d'office, NeoBase le demande à la première ouverture avec un avertissement |
-| `data:<id>` | lire les données d'un autre plugin (à déclarer aussi dans `uses`) |
+Un plugin ne reçoit que les autorisations qu'il déclare **et** que l'utilisateur accorde.
+L'utilisateur les voit dans l'appli **Autorisations**, par plugin ou par autorisation, et peut les retirer quand il veut.
+Le plugin redemande une autorisation au moment où il en a besoin, avec `ctx.permission(nom, raison)`.
+
+NeoBase contrôle chaque appel lui-même. Un appel sans l'autorisation échoue avec une erreur dont le message commence par `PERMISSION_DENIED`.
+
+| Autorisation | Risque | Donne accès à |
+|--------------|--------|---------------|
+| `storage` | faible | ses propres données, 50 Mo au plus pour tout son dossier |
+| `files` | faible | les fichiers livrés avec le plugin, rien d'autre sur le PC |
+| `notifications` | faible | le centre de notifications de NeoBase |
+| `network:exemple.org` | faible | ce domaine seulement ; `network:*.exemple.org` couvre aussi ses sous-domaines |
+| `network` | moyen | tous les sites Internet (préfère les domaines) |
+| `clipboard` | moyen | lire et écrire le presse-papiers |
+| `data:<id>:read` | moyen | lire les données qu'un autre plugin partage |
+| `data:<id>:write` | élevé | modifier les données qu'un autre plugin partage |
+| `system:exec:<programme>` | élevé | lancer un programme de la liste blanche du registre (`explorer`, `notepad`, `winget`…). Plugins **signés** seulement, toujours demandé à l'utilisateur |
+| `full` | élevé | **accès complet** : le plugin tourne dans la page de NeoBase, avec ses outils d'interface (`ctx.host`). Réservé aux plugins **signés** par NeoBase. Jamais accordé d'office : NeoBase le demande à la première ouverture, avec un avertissement |
+
+**Partager ses données.** Un plugin ne lit les données d'un autre que si ce dernier les partage dans son manifeste.
+- `"exposes": { "storage": "read" }` : les autres peuvent les lire.
+- `"exposes": { "storage": "write" }` : les autres peuvent les lire et les modifier.
+
+L'accord de l'utilisateur ne suffit pas. `ctx.data.get(id)` lit les données, `ctx.data.set(id, données)` les modifie.
+
+**Mises à jour.** Une nouvelle version qui demande plus d'autorisations ne s'installe pas d'office.
+NeoBase montre ce qui s'ajoute et attend l'accord de l'utilisateur. D'ici là, l'ancienne version reste en place.
+
+**Migration.** Déclare `"sdk": "2.0.0"` dans ton manifeste.
+- Les anciens noms sont convertis tout seuls, d'après la table `legacy` du registre : `data:<id>` devient `data:<id>:read`.
+- Un plugin sans `sdk` dont les données sont lues sans `exposes` reste lisible pour l'instant, avec un message de dépréciation dans le journal.
+- Ce cas sera refusé dans une prochaine version du registre.
 
 Demande le minimum : un plugin qui réclame trop d'autorisations est refusé à l'examen.
 
