@@ -13,7 +13,7 @@
       "label": "Ses données",
       "sentence": "Peut garder ses propres données (sauvegardées et synchronisées par NeoBase).",
       "risk": "faible",
-      "scope": { "quota": "50 Mo pour tout son dossier de données" }
+      "scope": { "quota": "sans plafond pour un plugin signé, 1 Go pour tout le dossier d'un plugin non vérifié" }
     },
     {
       "id": "files",

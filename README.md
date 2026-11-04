@@ -118,7 +118,7 @@ NeoBase contrôle chaque appel lui-même. Un appel sans l'autorisation échoue a
 
 | Autorisation | Risque | Donne accès à |
 |--------------|--------|---------------|
-| `storage` | faible | ses propres données, 50 Mo au plus pour tout son dossier |
+| `storage` | faible | ses propres données : sans plafond pour un plugin signé, 1 Go au plus pour un plugin non vérifié |
 | `files` | faible | les fichiers livrés avec le plugin, rien d'autre sur le PC |
 | `notifications` | faible | le centre de notifications de NeoBase |
 | `network:exemple.org` | faible | ce domaine seulement ; `network:*.exemple.org` couvre aussi ses sous-domaines |

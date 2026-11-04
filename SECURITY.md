@@ -29,7 +29,7 @@ Seule la dernière version de NeoBase reçoit des correctifs. NeoBase se met à 
   - NeoBase contrôle chaque appel ; un appel non autorisé échoue avec `PERMISSION_DENIED`.
   - Internet peut être limité à des domaines.
   - Les données d'un autre plugin ne sont lisibles que si ce plugin les partage (`exposes`). L'écriture est une autorisation à part.
-  - Le stockage est plafonné à 50 Mo par plugin.
+  - Le stockage d'un plugin non vérifié est plafonné à 1 Go.
   - Les programmes lancés doivent figurer dans une liste blanche.
 - **Une mise à jour qui demande plus d'autorisations** ne s'installe pas sans ton accord. L'ancienne version reste en place en attendant.
 - **Les plugins non signés** tournent dans une `<iframe sandbox>`, dans un processus à part. Ils n'ont pas accès à `window.neo` et ne parlent à NeoBase que par messages contrôlés.
