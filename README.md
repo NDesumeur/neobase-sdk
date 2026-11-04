@@ -31,6 +31,7 @@ L'exemple complet le plus simple est dans [`examples/hello`](examples/hello).
   "entry": "index.js",
   "view": "hello",
   "neobase": ">=4.1.0",
+  "sdk": "2.1.0",
   "type": "app",
   "category": "Outils",
   "mobile": true,
@@ -51,16 +52,21 @@ L'exemple complet le plus simple est dans [`examples/hello`](examples/hello).
 | `entry` | le script chargé par NeoBase (défaut `index.js`) |
 | `view` | identifiant de la vue que le plugin crée (unique) |
 | `neobase` | plage de versions de NeoBase compatibles (semver range) |
-| `type` | `app` (une application) ou `mod` (modifie NeoBase : sorties animes, calendrier…) |
+| `type` | `app` (une application), `mod` (modifie NeoBase : sorties animes, calendrier…) ou `theme` (n'apporte que des thèmes) |
 | `category` | catégorie dans NeoStore (Jeux, Outils, Bureautique…) |
 | `mobile` | `true` si compatible avec le téléphone |
 | `system` | réservé : un plugin système ne peut pas être désinstallé et se range dans la catégorie « Système » (fixé par NeoBase, pas par l'auteur). Réservé aux applis qui dépendent du cœur de NeoBase |
-| `main` | le **volet système** du plugin : un fichier Node (`main.js`) chargé par NeoBase seulement si le plugin est signé, activé et que l'accès complet est accordé (voir plus bas) |
+| `main` | le **volet système** du plugin : un fichier Node (`main.js`) chargé par NeoBase seulement si le plugin est signé, activé et que l'autorisation `system:main` est accordée (voir plus bas) |
+| `commands` | ses commandes : `[{ "id": "find", "title": "Chercher", "keys": "Ctrl+Alt+F", "global": false, "background": false }]`, dans la palette de commandes et la recherche de l'accueil (`ctx.commands.on`) ; `global` : raccourci actif hors de NeoBase (autorisation `shortcuts`) ; `background` : sans passer l'onglet au premier plan |
+| `opens` | « ouvrir avec » : les extensions qu'il sait ouvrir, `[".pdf"]` ; Fichiers et la Visionneuse lui envoient les fichiers (`ctx.onFiles`) |
+| `accepts` | ce qu'on peut lui partager : `["text", "url"]` (`ctx.onShare`) |
+| `widget` | `true` : il pose un widget sur l'accueil (`ctx.widget`) |
+| `themes` | des thèmes pour NeoBase : `[{ "id": "menthe", "name": "Menthe", "hue": 150, "sat": 40, "accent": "#33dd99", "light": "#aaffdd", "third": "#ffd84a" }]` |
 | `sync` | les règles de fusion de la synchro pour les documents du plugin (voir « Le dossier de données ») |
 | `dependencies` | autres plugins requis : `{ "neobase.autreplugin": ">=1.2.0" }` (installés automatiquement depuis le catalogue) |
 | `uses` | plugins dont celui-ci lit les données : `["neobase.peche"]` (demande la permission `data:<id>:read`) |
 | `exposes` | ce que ce plugin partage : `{ "storage": "read" }` ou `{ "storage": "write" }` |
-| `sdk` | version du SDK et du registre des autorisations visée : `"2.0.0"` |
+| `sdk` | version du SDK et du registre des autorisations visée : `"2.1.0"` |
 | `permissions` | liste des autorisations demandées (voir plus bas) |
 
 Le schéma de validation est dans [`plugin.schema.json`](plugin.schema.json).
@@ -82,6 +88,16 @@ export default async function (ctx) {
 }
 ```
 
+### Le bac à sable
+
+Chaque plugin tourne dans une `<iframe sandbox>` à lui, dans son propre processus : il n'a accès ni à NeoBase, ni aux autres plugins, ni au PC.
+Il reçoit pourtant le style de NeoBase (polices, couleurs du thème, classes `btn`, `card`…) et ses outils d'interface (`ctx.host`).
+Ce que le bac à sable interdit passe par NeoBase, qui vérifie l'autorisation à chaque appel :
+- `localStorage` est en mémoire (utilise `ctx.folder` pour garder des données) ;
+- `fetch` passe par `ctx.net` (seulement les domaines déclarés) ; `fetch('neoplugin://<son id>/…')` lit son propre volet système ;
+- le presse-papiers : écrire est libre, lire demande `clipboard` ;
+- `window.neo` est le même pont que `ctx.neo`.
+
 ### Ce que contient `ctx`
 
 | Membre | Disponible | Rôle |
@@ -97,8 +113,16 @@ export default async function (ctx) {
 | `ctx.folder.readFile(nom)` / `.writeFile(nom, base64)` / `.removeFile(nom)` / `.listFiles()` | `storage` | les **fichiers** (images, sons…) de ton dossier de données, en base64 |
 | `ctx.storage.get()` / `.set(data)` | `storage` | raccourci : le document `storage` de ton dossier |
 | `ctx.data.get(idAutrePlugin)` / `.set(idAutrePlugin, données)` | `data:<id>:read` / `:write` | lire ou modifier le document `storage` d'un autre plugin qui le partage (`exposes`) |
-| `ctx.host` | `full` | les outils d'interface de NeoBase : `el`, `toast`, `sfx`, `ask`, `newTab`, `pixIcon`, `PIX`, `WX`, `win(action)`, **`confirm(message)`** (boîte de confirmation de NeoBase, renvoie une promesse `true`/`false`, jamais la fenêtre de Windows), `box({title, text, buttons, danger})`, `settings()` (réglages de NeoBase en lecture seule), `tabLabel(texte, titre)` (le texte de ton onglet : messages non lus…), `pref(nom)` (un réglage de NeoBase, lecture seule), **`hooks({audio, mute, onClose, onTabChange, playing})`** : dis à NeoBase si ton plugin joue du son (haut-parleur sur l'onglet, NeoMe qui danse), ce qu'il doit faire quand ton onglet se ferme ou que l'utilisateur change d'onglet (mini-lecteur…) |
-| `ctx.legacy` | `full` | lecture seule des données d'**avant les plugins** (`settings()`, `api(nom)`, `local(clé)`), pour reprendre ce que l'utilisateur avait à la première ouverture |
+| `ctx.host` | toujours | les outils d'interface de NeoBase : `el`, `toast`, `sfx`, `ask`, `newTab`, `pixIcon`, `PIX`, `WX`, `addStyle(css)`, `sky()`, `win('focus' \| 'fs')`, **`confirm(message)`** (boîte de confirmation de NeoBase, renvoie une promesse `true`/`false`, jamais la fenêtre de Windows), `box({title, text, buttons, danger})`, `settings()` (réglages de NeoBase en lecture seule), `tabLabel(texte, titre)` (le texte de ton onglet : messages non lus…), `pref(nom)` (un réglage de NeoBase, lecture seule), **`hooks({audio, mute, onClose, onTabChange, playing})`** : dis à NeoBase si ton plugin joue du son (haut-parleur sur l'onglet, NeoMe qui danse), ce qu'il doit faire quand ton onglet se ferme ou que l'utilisateur change d'onglet (mini-lecteur…) |
+| `ctx.legacy` | plugin signé | lecture seule de **ses propres** données d'avant les plugins (`settings()`, `api(nom)`, `local(clé)`), pour reprendre ce que l'utilisateur avait à la première ouverture |
+| `ctx.neo.<fonction>(…)` | selon la fonction | les fonctions du PC, chacune derrière son autorisation : `documents` (ouvrir, convertir, PDF, Word/Excel), `screen`, `music`, `system:info`… (liste dans le tableau des autorisations). `ctx.neo.onXxx(fn)` s'abonne à un événement. Une fonction hors de la liste n'existe pas |
+| `ctx.commands.on(id, fn)` / `.run(id)` | toujours | exécuter les commandes déclarées dans `commands` |
+| `ctx.onFiles(fn)` | `opens` | recevoir les fichiers ouverts avec le plugin (chemins) |
+| `ctx.share(données)` / `ctx.onShare(fn)` | toujours / `accepts` | partager un texte ou un lien ; recevoir ce qu'on lui partage |
+| `ctx.search.provide(fn)` | `search` | ses résultats dans la recherche de l'accueil : `fn(q)` renvoie `[{ id, title, hint }]` (8 au plus) ; un clic ouvre le plugin et lance sa commande `search` avec l'`id` choisi |
+| `ctx.widget.set({ title, text })` ou `({ title, lines: [...] })` / `.clear()` | `widget: true` | son widget sur l'accueil (4 lignes au plus) |
+| `ctx.background.every(minutes, fn)` | `background` | une tâche de fond, même onglet fermé (plugin chargé au démarrage) |
+| `ctx.backup.list()` / `.restore(nom)` | `storage` | les sauvegardes de son dossier de données, et revenir à l'une d'elles |
 | `ctx.files.add/read/remove` | `files` | fichiers (images, exports…) du plugin |
 | `ctx.net(url, opts)` | `network` ou `network:<domaine>` | requêtes réseau sortantes |
 | `ctx.permission(nom, raison)` | toujours | demander une autorisation au moment de l'utiliser, en disant pourquoi ; l'utilisateur choisit « cette fois », « toujours » ou « refuser » ; renvoie un booléen |
@@ -106,7 +130,7 @@ export default async function (ctx) {
 
 ### Les autorisations
 
-Toutes les autorisations viennent d'un seul registre, [`permissions.json`](permissions.json) (registre 2, SDK 2.0.0).
+Toutes les autorisations viennent d'un seul registre, [`permissions.json`](permissions.json) (registre 2, SDK 2.1.0).
 Pour chacune, il donne son identifiant, son libellé, la phrase montrée à l'utilisateur et son niveau de risque.
 Une autorisation absente du registre fait échouer la validation du plugin.
 
@@ -127,7 +151,21 @@ NeoBase contrôle chaque appel lui-même. Un appel sans l'autorisation échoue a
 | `data:<id>:read` | moyen | lire les données qu'un autre plugin partage |
 | `data:<id>:write` | élevé | modifier les données qu'un autre plugin partage |
 | `system:exec:<programme>` | élevé | lancer un programme de la liste blanche du registre (`explorer`, `notepad`, `winget`…). Plugins **signés** seulement, toujours demandé à l'utilisateur |
-| `full` | élevé | **accès complet** : le plugin tourne dans la page de NeoBase, avec ses outils d'interface (`ctx.host`). Réservé aux plugins **signés** par NeoBase. Jamais accordé d'office : NeoBase le demande à la première ouverture, avec un avertissement |
+| `documents` | élevé | les fichiers du PC que l'utilisateur choisit ou glisse : ouvrir, convertir, lire un PDF, importer et exporter Word/Excel/PowerPoint (`ctx.neo.pdfRead`, `convRun`, `officeImport`, `pathOf`…) |
+| `screen` | élevé | une capture de l'écran (`screenCapture`) |
+| `music` | moyen | la bibliothèque de NeoMusic (`music*`) |
+| `agenda` | faible | ses événements dans l'emploi du temps (`ctx.host.agenda.sync`) |
+| `taskbar` | faible | un compagnon sur la barre des tâches (`tbPet*`) |
+| `background` | moyen | des tâches de fond, et être chargé au démarrage |
+| `search` | moyen | ses résultats dans la recherche de l'accueil |
+| `shortcuts` | moyen | des raccourcis globaux (hors de NeoBase) |
+| `system:info` | moyen | l'état du PC : processeur, mémoire, programmes ouverts, icônes des programmes |
+| `system:processes` | élevé | fermer un programme. Plugins **signés** seulement |
+| `system:startup` | élevé | les programmes lancés au démarrage de Windows. Plugins **signés** seulement |
+| `system:terminal` | élevé | un terminal (PowerShell). Plugins **signés** seulement |
+| `system:update` | élevé | les mises à jour de NeoBase et des plugins. Plugins **signés** seulement |
+| `system:main` | élevé | charger son **volet système** (`main`, code Node). Plugins **signés** seulement, demandé à la première ouverture |
+| `full` | élevé | **accès complet** : le plugin tourne dans la page de NeoBase, sans bac à sable. Réservé aux rares plugins **signés** qui pilotent NeoBase lui-même (onglets, pages web intégrées). Jamais accordé d'office : NeoBase le demande à la première ouverture, avec un avertissement. Préfère toujours les autorisations précises |
 
 **Partager ses données.** Un plugin ne lit les données d'un autre que si ce dernier les partage dans son manifeste.
 - `"exposes": { "storage": "read" }` : les autres peuvent les lire.
@@ -138,7 +176,7 @@ L'accord de l'utilisateur ne suffit pas. `ctx.data.get(id)` lit les données, `c
 **Mises à jour.** Une nouvelle version qui demande plus d'autorisations ne s'installe pas d'office.
 NeoBase montre ce qui s'ajoute et attend l'accord de l'utilisateur. D'ici là, l'ancienne version reste en place.
 
-**Migration.** Déclare `"sdk": "2.0.0"` dans ton manifeste.
+**Migration.** Déclare `"sdk": "2.1.0"` dans ton manifeste.
 - Les anciens noms sont convertis tout seuls, d'après la table `legacy` du registre : `data:<id>` devient `data:<id>:read`.
 - Un plugin sans `sdk` dont les données sont lues sans `exposes` reste lisible pour l'instant, avec un message de dépréciation dans le journal.
 - Ce cas sera refusé dans une prochaine version du registre.
@@ -185,7 +223,7 @@ Chaque document du dossier part dans le fichier de synchro (une section `pd/<id>
 
 ## Le volet système d'un plugin (`main`)
 
-Un plugin qui a besoin de Node ou d'Electron (lancer un programme, lire des fichiers du PC, des raccourcis globaux, servir des fichiers) met ce code dans un fichier `main.js`, nommé par le champ `main`. NeoBase le charge **seulement** si le plugin est signé, activé et a reçu l'accès complet : aucun code de ce genre ne vit dans le cœur.
+Un plugin qui a besoin de Node ou d'Electron (lancer un programme, lire des fichiers du PC, des raccourcis globaux, servir des fichiers) met ce code dans un fichier `main.js`, nommé par le champ `main`. NeoBase le charge **seulement** si le plugin est signé, activé et a reçu l'autorisation `system:main` : aucun code de ce genre ne vit dans le cœur.
 
 ```js
 module.exports = api => {

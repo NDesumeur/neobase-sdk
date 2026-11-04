@@ -2,34 +2,270 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Plugin NeoBase",
   "type": "object",
-  "required": ["id", "name", "version", "author", "entry", "view", "neobase", "type"],
+  "required": [
+    "id",
+    "name",
+    "version",
+    "author",
+    "entry",
+    "view",
+    "neobase",
+    "type"
+  ],
   "additionalProperties": false,
   "properties": {
-    "id": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)+$", "description": "identifiant unique, style auteur.nom" },
-    "name": { "type": "string", "minLength": 1, "maxLength": 40 },
-    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
-    "author": { "type": "string", "minLength": 1 },
-    "description": { "type": "string", "maxLength": 200 },
-    "icon": { "type": "string" },
-    "entry": { "type": "string", "default": "index.js" },
-    "view": { "type": "string", "pattern": "^[a-zA-Z][\\w-]*$" },
-    "neobase": { "type": "string", "description": "plage semver des versions de NeoBase compatibles" },
-    "type": { "enum": ["app", "mod"] },
-    "category": { "type": "string" },
-    "mobile": { "type": "boolean", "default": false },
-    "system": { "type": "boolean", "default": false },
-    "main": { "type": "string", "pattern": "^[\\w.\\-/]+\\.js$", "description": "Volet système : fichier Node chargé si le plugin est signé, activé et a l'accès complet." },
-    "sync": { "type": "object", "description": "Règles de fusion de la synchro par document : { doc: { auto: [chemins], union: [chemins] } }", "additionalProperties": { "type": "object", "properties": { "auto": { "type": "array", "items": { "type": "string" } }, "union": { "type": "array", "items": { "type": "string" } } } } },
-    "uses": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)+$" }, "description": "plugins dont celui-ci lit les données (donne la permission data:<id>:read)" },
-    "dependencies": { "type": "object", "additionalProperties": { "type": "string" } },
-    "autoload": { "type": "boolean", "description": "Charger le plugin au démarrage (accès complet et signature exigés)." },
-    "sdk": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "version du SDK (et donc du registre des autorisations) pour laquelle le plugin est écrit, ex. 2.0.0" },
-    "exposes": { "type": "object", "description": "ce que le plugin partage avec les autres : { \"storage\": \"read\" } ou { \"storage\": \"write\" }", "properties": { "storage": { "enum": ["read", "write"] } }, "additionalProperties": false },
-    "permissions": { "type": "array", "uniqueItems": true, "description": "autorisations prises dans le registre permissions.json ; une autre fait échouer la validation", "items": { "anyOf": [
-      { "enum": ["storage", "files", "network", "clipboard", "notifications", "full"] },
-      { "type": "string", "pattern": "^network:(\\*\\.)?([a-z0-9-]+\\.)+[a-z]{2,}$" },
-      { "type": "string", "pattern": "^data:[a-z0-9]+(\\.[a-z0-9]+)+:(read|write)$" },
-      { "type": "string", "pattern": "^system:exec:(explorer|notepad|winget|warp-cli|obs64|Discord)$" }
-    ] } }
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)+$",
+      "description": "identifiant unique, style auteur.nom"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "icon": {
+      "type": "string"
+    },
+    "entry": {
+      "type": "string",
+      "default": "index.js"
+    },
+    "view": {
+      "type": "string",
+      "pattern": "^[a-zA-Z][\\w-]*$"
+    },
+    "neobase": {
+      "type": "string",
+      "description": "plage semver des versions de NeoBase compatibles"
+    },
+    "type": {
+      "enum": [
+        "app",
+        "mod",
+        "theme"
+      ],
+      "description": "app : une application ; mod : modifie NeoBase ; theme : n'apporte que des thèmes (champ themes)"
+    },
+    "category": {
+      "type": "string"
+    },
+    "mobile": {
+      "type": "boolean",
+      "default": false
+    },
+    "system": {
+      "type": "boolean",
+      "default": false
+    },
+    "main": {
+      "type": "string",
+      "pattern": "^[\\w.\\-/]+\\.js$",
+      "description": "Volet système : fichier Node chargé si le plugin est signé, activé et a l'accès complet."
+    },
+    "sync": {
+      "type": "object",
+      "description": "Règles de fusion de la synchro par document : { doc: { auto: [chemins], union: [chemins] } }",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "auto": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "union": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "uses": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)+$"
+      },
+      "description": "plugins dont celui-ci lit les données (donne la permission data:<id>:read)"
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "autoload": {
+      "type": "boolean",
+      "description": "Charger le plugin au démarrage (accès complet et signature exigés)."
+    },
+    "sdk": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "version du SDK (et donc du registre des autorisations) pour laquelle le plugin est écrit, ex. 2.0.0"
+    },
+    "exposes": {
+      "type": "object",
+      "description": "ce que le plugin partage avec les autres : { \"storage\": \"read\" } ou { \"storage\": \"write\" }",
+      "properties": {
+        "storage": {
+          "enum": [
+            "read",
+            "write"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "permissions": {
+      "type": "array",
+      "uniqueItems": true,
+      "description": "autorisations prises dans le registre permissions.json ; une autre fait échouer la validation",
+      "items": {
+        "anyOf": [
+          {
+            "enum": [
+              "storage",
+              "files",
+              "network",
+              "clipboard",
+              "notifications",
+              "full"
+            ]
+          },
+          {
+            "type": "string",
+            "pattern": "^network:(\\*\\.)?([a-z0-9-]+\\.)+[a-z]{2,}$"
+          },
+          {
+            "type": "string",
+            "pattern": "^data:[a-z0-9]+(\\.[a-z0-9]+)+:(read|write)$"
+          },
+          {
+            "type": "string",
+            "pattern": "^system:exec:(explorer|notepad|winget|warp-cli|obs64|Discord)$"
+          }
+        ]
+      }
+    },
+    "commands": {
+      "type": "array",
+      "maxItems": 30,
+      "description": "les commandes du plugin : dans la palette de commandes et la recherche de l'accueil, avec un raccourci",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,39}$"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "keys": {
+            "type": "string",
+            "pattern": "^(Ctrl|Alt|Shift|Meta)(\\+(Ctrl|Alt|Shift|Meta))*\\+[A-Za-z0-9]$"
+          },
+          "global": {
+            "type": "boolean",
+            "description": "raccourci actif même quand NeoBase n'est pas au premier plan (autorisation shortcuts)"
+          },
+          "background": {
+            "type": "boolean",
+            "description": "la commande ne fait pas passer l'onglet du plugin au premier plan"
+          }
+        }
+      }
+    },
+    "opens": {
+      "type": "array",
+      "maxItems": 40,
+      "description": "« ouvrir avec » : les extensions de fichier que le plugin sait ouvrir (ctx.onFiles)",
+      "items": {
+        "type": "string",
+        "pattern": "^\\.[a-z0-9]{1,10}$"
+      }
+    },
+    "accepts": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "text",
+          "url"
+        ]
+      },
+      "description": "ce qu'on peut partager avec le plugin (ctx.onShare)"
+    },
+    "widget": {
+      "type": "boolean",
+      "description": "le plugin pose un widget sur l'accueil (ctx.widget)"
+    },
+    "themes": {
+      "type": "array",
+      "maxItems": 20,
+      "description": "thèmes apportés par le plugin",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "hue"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,29}$"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "hue": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 360
+          },
+          "sat": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "accent": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          },
+          "light": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          },
+          "third": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          }
+        }
+      }
+    }
   }
 }

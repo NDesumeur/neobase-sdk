@@ -1,6 +1,6 @@
 {
   "registry": 2,
-  "sdk": "2.0.0",
+  "sdk": "2.1.0",
   "about": "Registre unique des autorisations de NeoBase. Source de vérité pour le SDK, le schéma plugin.schema.json, le moteur de plugins, NeoStore et l'appli Autorisations. Une autorisation absente de ce registre fait échouer la validation du plugin.",
   "risks": {
     "faible": "Ne touche qu'à ce qui appartient au plugin.",
@@ -13,7 +13,9 @@
       "label": "Ses données",
       "sentence": "Peut garder ses propres données (sauvegardées et synchronisées par NeoBase).",
       "risk": "faible",
-      "scope": { "quota": "sans plafond pour un plugin signé, 1 Go pour tout le dossier d'un plugin non vérifié" }
+      "scope": {
+        "quota": "sans plafond pour un plugin signé, 1 Go pour tout le dossier d'un plugin non vérifié"
+      }
     },
     {
       "id": "files",
@@ -33,7 +35,9 @@
       "label": "Internet ({domaine})",
       "sentence": "Peut contacter {domaine}, et aucun autre site.",
       "risk": "faible",
-      "scope": { "domaine": "un nom de domaine ; *.exemple.org couvre aussi ses sous-domaines" }
+      "scope": {
+        "domaine": "un nom de domaine ; *.exemple.org couvre aussi ses sous-domaines"
+      }
     },
     {
       "id": "network",
@@ -53,7 +57,9 @@
       "label": "Lire les données de {plugin}",
       "sentence": "Peut lire les données que {plugin} partage.",
       "risk": "moyen",
-      "scope": { "plugin": "l'identifiant de l'autre plugin, qui doit aussi le déclarer dans « exposes »" }
+      "scope": {
+        "plugin": "l'identifiant de l'autre plugin, qui doit aussi le déclarer dans « exposes »"
+      }
     },
     {
       "id": "data:<plugin>:write",
@@ -61,7 +67,9 @@
       "label": "Modifier les données de {plugin}",
       "sentence": "Peut modifier les données que {plugin} partage.",
       "risk": "élevé",
-      "scope": { "plugin": "l'identifiant de l'autre plugin, qui doit aussi le déclarer dans « exposes » avec « write »" }
+      "scope": {
+        "plugin": "l'identifiant de l'autre plugin, qui doit aussi le déclarer dans « exposes » avec « write »"
+      }
     },
     {
       "id": "system:exec:<programme>",
@@ -71,7 +79,103 @@
       "risk": "élevé",
       "sensitive": true,
       "signedOnly": true,
-      "scope": { "programme": "le nom exact du programme, pris dans une liste blanche" }
+      "scope": {
+        "programme": "le nom exact du programme, pris dans une liste blanche"
+      }
+    },
+    {
+      "id": "documents",
+      "label": "Tes documents",
+      "sentence": "Peut ouvrir et enregistrer des fichiers sur ton PC : ceux que tu choisis dans une fenêtre, ou ceux qu'il a déjà ouverts.",
+      "risk": "élevé"
+    },
+    {
+      "id": "screen",
+      "label": "Ton écran",
+      "sentence": "Peut prendre une capture de ton écran.",
+      "risk": "élevé"
+    },
+    {
+      "id": "music",
+      "label": "Ta bibliothèque NeoMusic",
+      "sentence": "Peut lire et ajouter des morceaux dans ta bibliothèque de musique.",
+      "risk": "moyen"
+    },
+    {
+      "id": "agenda",
+      "label": "Ton emploi du temps",
+      "sentence": "Peut ajouter ses propres événements à l'emploi du temps de NeoBase.",
+      "risk": "faible"
+    },
+    {
+      "id": "taskbar",
+      "label": "Barre des tâches",
+      "sentence": "Peut afficher un compagnon animé sur la barre des tâches.",
+      "risk": "faible"
+    },
+    {
+      "id": "background",
+      "label": "Tâches de fond",
+      "sentence": "Peut tourner sans être ouvert, dès le démarrage de NeoBase.",
+      "risk": "moyen"
+    },
+    {
+      "id": "search",
+      "label": "Recherche",
+      "sentence": "Voit ce que tu tapes dans la recherche de l'accueil, pour te proposer ses résultats.",
+      "risk": "moyen"
+    },
+    {
+      "id": "shortcuts",
+      "label": "Raccourcis globaux",
+      "sentence": "Peut réagir à ses raccourcis clavier même quand NeoBase n'est pas au premier plan.",
+      "risk": "moyen"
+    },
+    {
+      "id": "system:info",
+      "label": "Infos du PC",
+      "sentence": "Peut voir le processeur, la mémoire et les programmes ouverts sur ton PC.",
+      "risk": "moyen"
+    },
+    {
+      "id": "system:processes",
+      "label": "Arrêter des programmes",
+      "sentence": "Peut forcer l'arrêt des programmes ouverts sur ton PC. Très sensible : accordé seulement aux plugins signés.",
+      "risk": "élevé",
+      "sensitive": true,
+      "signedOnly": true
+    },
+    {
+      "id": "system:startup",
+      "label": "Démarrage de Windows",
+      "sentence": "Peut choisir les programmes lancés au démarrage de Windows. Très sensible : accordé seulement aux plugins signés.",
+      "risk": "élevé",
+      "sensitive": true,
+      "signedOnly": true
+    },
+    {
+      "id": "system:terminal",
+      "label": "Terminal",
+      "sentence": "Peut lancer des commandes dans un terminal de ton PC. Très sensible : accordé seulement aux plugins signés.",
+      "risk": "élevé",
+      "sensitive": true,
+      "signedOnly": true
+    },
+    {
+      "id": "system:update",
+      "label": "Mises à jour",
+      "sentence": "Peut chercher et installer les mises à jour de NeoBase et de ses plugins. Très sensible : accordé seulement aux plugins signés.",
+      "risk": "élevé",
+      "sensitive": true,
+      "signedOnly": true
+    },
+    {
+      "id": "system:main",
+      "label": "Volet système",
+      "sentence": "A un volet qui tourne sur ton PC, hors du bac à sable (Node et Electron). Très sensible : accordé seulement aux plugins signés.",
+      "risk": "élevé",
+      "sensitive": true,
+      "signedOnly": true
     },
     {
       "id": "full",
@@ -82,14 +186,66 @@
       "signedOnly": true
     }
   ],
-  "execAllowed": ["explorer", "notepad", "winget", "warp-cli", "obs64", "Discord"],
+  "execAllowed": [
+    "explorer",
+    "notepad",
+    "winget",
+    "warp-cli",
+    "obs64",
+    "Discord"
+  ],
   "legacy": {
     "data:<plugin>": "data:<plugin>:read"
   },
   "risky": [
-    { "all": ["network", "files"], "why": "peut envoyer sur Internet les fichiers qu'il lit" },
-    { "all": ["network", "clipboard"], "why": "peut envoyer sur Internet ce que tu as copié" },
-    { "all": ["network", "data:*:read"], "why": "peut envoyer sur Internet les données d'un autre plugin" },
-    { "all": ["network", "system:exec:*"], "why": "peut télécharger puis lancer un programme" }
+    {
+      "all": [
+        "network",
+        "files"
+      ],
+      "why": "peut envoyer sur Internet les fichiers qu'il lit"
+    },
+    {
+      "all": [
+        "network",
+        "clipboard"
+      ],
+      "why": "peut envoyer sur Internet ce que tu as copié"
+    },
+    {
+      "all": [
+        "network",
+        "data:*:read"
+      ],
+      "why": "peut envoyer sur Internet les données d'un autre plugin"
+    },
+    {
+      "all": [
+        "network",
+        "system:exec:*"
+      ],
+      "why": "peut télécharger puis lancer un programme"
+    },
+    {
+      "all": [
+        "network",
+        "documents"
+      ],
+      "why": "peut envoyer sur Internet les fichiers de ton PC qu'il ouvre"
+    },
+    {
+      "all": [
+        "network",
+        "screen"
+      ],
+      "why": "peut envoyer sur Internet des captures de ton écran"
+    },
+    {
+      "all": [
+        "network",
+        "search"
+      ],
+      "why": "peut envoyer sur Internet ce que tu tapes dans la recherche"
+    }
   ]
 }
