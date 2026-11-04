@@ -102,6 +102,7 @@ export default async function (ctx) {
 | `ctx.files.add/read/remove` | `files` | fichiers (images, exports…) du plugin |
 | `ctx.net(url, opts)` | `network` ou `network:<domaine>` | requêtes réseau sortantes |
 | `ctx.permission(nom, raison)` | toujours | demander une autorisation au moment de l'utiliser, en disant pourquoi ; l'utilisateur choisit « cette fois », « toujours » ou « refuser » ; renvoie un booléen |
+| `ctx.notifications.send({ title, body, open })` | `notifications` | une notification dans le centre de notifications de NeoBase (et une notification Windows si NeoBase n'est pas au premier plan) ; `open` : ce qu'un clic ouvre (`https://…`, `plugin:<id>`, `neodyme:…`) |
 
 ### Les autorisations
 
