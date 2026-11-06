@@ -75,6 +75,15 @@
       "pattern": "^[\\w.\\-/]+\\.js$",
       "description": "Volet système : fichier Node chargé si le plugin est signé, activé et a l'accès complet."
     },
+    "syncMode": {
+      "enum": ["aucune", "progression", "fusion"],
+      "description": "Comment la synchro entre appareils traite les données du plugin. aucune : jamais synchronisées. progression : jamais de conflit, le meilleur chiffre ou l'appareil le plus récent gagne (jeux). fusion : ajouts et suppressions des deux côtés gardés, un vrai conflit se règle dans fgestion. Sans ce champ : progression pour la catégorie Jeux, fusion sinon."
+    },
+    "syncInfo": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "En une phrase : ce que le plugin synchronise (ou pourquoi il ne synchronise rien). Affiché dans fgestion."
+    },
     "sync": {
       "type": "object",
       "description": "Règles de fusion de la synchro par document : { doc: { auto: [chemins], union: [chemins] } }",
